@@ -2,10 +2,9 @@
  * Created by CLAKE on 2016/8/9.
  */
 import webpack from 'webpack';
-import ExtractTextPlugin from 'extract-text-webpack-plugin';
 import path from 'path';
 import process from 'process';
-
+import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 
 let ENV = process.env.NODE_ENV;
 // var ip = require('ip');
@@ -21,14 +20,11 @@ export default {
         //主文件
         index : './src/index.jsx'
     },
+    mode: 'production',
     //插件项
     plugins: [
-        new webpack.optimize.CommonsChunkPlugin('common'),
-        new ExtractTextPlugin("[name].css"),
-        new webpack.optimize.UglifyJsPlugin({
-            compress: {
-                warnings: false
-            }
+        new MiniCssExtractPlugin({
+            filename: "[name].css"
         }),
         new webpack.DefinePlugin({
             "process.env": {
@@ -36,20 +32,32 @@ export default {
             }
         })
     ],
+    optimization: {
+        splitChunks: {
+            cacheGroups: {
+                commons: {
+                    name: "common",
+                    chunks: "initial",
+                    minChunks: 2
+                }
+            }
+        },
+        minimize:true
+    },
     output: {
         path: `${__dirname}/dist`,
         filename: '[name].js',
-        chunkFilename:`./view/chunk/[name].[chunkhash:8].js`
+        chunkFilename:`./view/[name].[chunkhash:8].js`
     },
     module: {
         rules: [
             {
                 test: /\.css$/,
-                use: ['style-loader','css-loader']
+                use: [MiniCssExtractPlugin.loader,'style-loader','css-loader']
             },
             {
                 test: /\.less$/,
-                use: ['style-loader','css-loader','less-loader']
+                use: [MiniCssExtractPlugin.loader,'css-loader','less-loader']
             },
             { test: /\.woff[2]?$/, use: "url-loader?limit=10000&mimetype=application/font-woff" },
             { test: /\.ttf$/,  use: "url-loader?limit=10000&mimetype=application/octet-stream" },
@@ -83,16 +91,13 @@ export default {
     node: {
         fs: 'empty'
     },
-    externals: [
-        {
-            "jquery": "jQuery",
-            "react": "React",
-            "react-dom": "ReactDOM",
-            "zepto": "Zepto",
-            "amazeui-react": "AMUIReact",
-            "marked":"marked",
-            "moment":"moment"
-        },
-        require('webpack-require-http')
-    ]
+    externals: {
+        "jquery": "jQuery",
+        "react": "React",
+        "react-dom": "ReactDOM",
+        "zepto": "Zepto",
+        "marked":"Marked",
+        // "moment":"Moment",
+        "@clake/react-bootstrap4":"ReactBootstrapV4"
+    }
 };

@@ -5,19 +5,17 @@ import React from 'react';
 import {
     Route,
     Switch,
-    BrowserRouter
+    BrowserRouter as Router
 } from 'react-router-dom';
 
 import App from './components/App';
 
 const routes = (
-    <BrowserRouter>
+    <Router>
         <Switch>
-            <Route path="/:dict/:component/(:id)" component={App} />
-            <Route path="/:component(/:id)" component={App} />
             <Route component={App}/>
         </Switch>
-    </BrowserRouter>
+    </Router>
 );
 
 export default routes;

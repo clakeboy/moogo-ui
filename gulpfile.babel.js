@@ -12,6 +12,9 @@ import webpackHotMiddleware from 'webpack-hot-middleware';
 // import webpackConfigDev from './webpack.dev.config';
 import gutil from 'gulp-util';
 import pkg from './package.json';
+
+import historyApiFallback from 'connect-history-api-fallback';
+
 const $ = gulpLoadPlugins();
 
 const banner = `/** ${pkg.title} v${pkg.version} | by Clake
@@ -43,6 +46,7 @@ gulp.task('server', () => {
         server: {
             baseDir: ['dist'],
             middleware: [
+                historyApiFallback(),
                 webpackDevMiddleware(bundler, {
                     publicPath: '/',  //webpackConfig.output.publicPath,
                     stats: {colors: true},
