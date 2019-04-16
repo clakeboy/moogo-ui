@@ -2,29 +2,43 @@
  * Created by clakeboy on 2017/12/3.
  */
 import React from 'react';
-import LoaderComponent from './LoaderComponent';
+import Header from "./Header";
+import Menu from "./Menu";
+import {
+    Common,
+    LoaderComponent,
+    Modal,
+} from '@clake/react-bootstrap4';
+import Login from "./Login";
+import {GetComponent, GetQuery} from "../common/Funcs";
 
 export default class App extends React.Component {
     constructor(props) {
         super(props);
+        this.state = {
+            login: false,
+            title: '',
+        };
+        this.modal = null;
     }
 
     componentDidMount() {
-        console.log("sssss")
+
     }
 
-    ucFirst(str) {
-        let first = str[0].toUpperCase();
-        return first+str.substr(1);
-    }
-
-    under2hump(str) {
-        let arr = str.split('_');
-        let hump = arr.map((item)=>{
-            return this.ucFirst(item);
+    setLogin = (user, is_login) => {
+        this.user = user;
+        this.setState({
+            login: is_login
         });
-        return hump.join('');
-    }
+    };
+
+    setTitle = (title) => {
+        this.setState({
+            title: title
+        });
+        document.title = title + ' - Go Terminal';
+    };
 
     explainUrl(path) {
         let arr = path.split('/');
@@ -33,18 +47,27 @@ export default class App extends React.Component {
         if (module === "") {
             module = 'Main';
         } else {
-            module = this.under2hump(module)
+            module = Common.under2hump(module)
         }
 
         return arr.join('/') + "/" + module;
     }
 
     render() {
+        if (!this.state.login) {
+            return <Login setLogin={this.setLogin}/>
+        }
         let load_path = this.explainUrl(this.props.location.pathname);
         return (
-            <div>
-                <div>头是这样</div>
-                <LoaderComponent loadPath={load_path} {...this.props}/>
+            <div className='d-flex flex-column h-100'>
+                <Header query={GetQuery(this.props.location.search)} modal={this.modal}/>
+                <div className='d-flex flex-grow-1 '>
+                    <Menu query={GetQuery(this.props.location.search)}/>
+                    <div className='flex-grow-1' style={{overflow:'auto'}}>
+                        <LoaderComponent import={GetComponent} closeModal={this.closeModal} loadPath={load_path}/>
+                    </div>
+                </div>
+                <Modal ref={c=>this.modal=c}/>
             </div>
         );
     }

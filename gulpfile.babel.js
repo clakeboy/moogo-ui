@@ -58,7 +58,9 @@ gulp.task('server', () => {
                 }),
                 webpackHotMiddleware(bundler)
             ]
-        }
+        },
+        ghostMode:false,
+        codeSync:false
     });
 });
 

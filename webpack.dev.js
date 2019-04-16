@@ -20,6 +20,36 @@ export default merge(cfg,{
             }
         })
     ],
+    module: {
+        rules: [
+            {
+                test: /\.css$/,
+                use: ['style-loader','css-loader']
+            },
+            {
+                test: /\.less$/,
+                use: ['style-loader','css-loader','less-loader']
+            }
+        ]
+    },
+    // optimization: {
+    //     splitChunks: {
+    //         minSize: 50000,
+    //         cacheGroups: {
+    //             commons: {
+    //                 name: "common",
+    //                 chunks: "all",
+    //                 minChunks: 2
+    //             },
+    //             styles: {
+    //                 name: 'style',
+    //                 test: /\.less$/,
+    //                 chunks: 'all'
+    //             }
+    //         }
+    //     },
+    //     minimize:false,
+    // },
     mode: 'development',
     devtool: 'eval-source-map',
 });
