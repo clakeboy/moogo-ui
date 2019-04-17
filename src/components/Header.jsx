@@ -2,6 +2,7 @@
  * Created by clakeboy on 2019/1/17.
  */
 import React from 'react';
+
 import '../assets/css/header.less';
 import {
     Button,
@@ -9,6 +10,7 @@ import {
     LoaderComponent
 } from '@clake/react-bootstrap4';
 import {GetComponent} from "../common/Funcs";
+import {CommonContext} from "../context/Common";
 
 class Header extends React.PureComponent {
     constructor(props) {
@@ -16,19 +18,19 @@ class Header extends React.PureComponent {
     }
 
     componentDidMount() {
-
+        console.log(this.context);
     }
 
     render() {
         return (
-            <div className='moogo-header'>
-                <Button className='ml-2' icon='plus' size='sm' onClick={()=>{
+            <div className='d-flex align-items-center moogo-header'>
+                <Button className='ml-2' icon='server' size='sm' onClick={()=>{
                     this.modal.view({
                         title:'服务器列表',
                         content:<LoaderComponent import={GetComponent} loadPath='/server/List'/>
                     });
                 }}>
-                    添加服务器
+                    服务器
                 </Button>
                 <CKModal ref={c=>this.modal=c}/>
             </div>
@@ -36,4 +38,5 @@ class Header extends React.PureComponent {
     }
 }
 
+Header.contextType = CommonContext;
 export default Header;

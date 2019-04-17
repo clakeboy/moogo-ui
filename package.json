@@ -41,9 +41,6 @@
     "connect-history-api-fallback": "^1.5.0",
     "css-loader": "^0.28.7",
     "del": "^3.0.0",
-    "electron": "^5.0.0-beta.4",
-    "electron-builder": "^20.38.5",
-    "electron-packager": "^13.1.0",
     "file-loader": "^1.1.5",
     "gulp": "^3.9.1",
     "gulp-babel": "^8.0.0",
@@ -70,6 +67,6 @@
     "classnames": "^2.2.6",
     "es6-promise": "^4.2.4",
     "whatwg-fetch": "^3.0.0",
-    "@clake/react-bootstrap4": "^0.8.2"
+    "@clake/react-bootstrap4": "^0.8.4"
   }
 }

@@ -4,6 +4,7 @@
 import React from 'react';
 import Header from "./Header";
 import Menu from "./Menu";
+import {CommonContext} from '../context/Common';
 import {
     Common,
     LoaderComponent,
@@ -59,16 +60,18 @@ export default class App extends React.Component {
         }
         let load_path = this.explainUrl(this.props.location.pathname);
         return (
+            <CommonContext.Provider value={{title:this.setTitle,login:this.setLogin}}>
             <div className='d-flex flex-column h-100'>
                 <Header query={GetQuery(this.props.location.search)} modal={this.modal}/>
                 <div className='d-flex flex-grow-1 '>
                     <Menu query={GetQuery(this.props.location.search)}/>
-                    <div className='flex-grow-1' style={{overflow:'auto'}}>
+                    <div className='flex-grow-1 main-content'>
                         <LoaderComponent import={GetComponent} closeModal={this.closeModal} loadPath={load_path}/>
                     </div>
                 </div>
                 <Modal ref={c=>this.modal=c}/>
             </div>
+            </CommonContext.Provider>
         );
     }
 }
