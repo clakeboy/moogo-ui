@@ -8,8 +8,51 @@ html,body {
   height:100%;
 }
 
+.overflow-hidden {
+  overflow:hidden;
+}
+
+.overflow-auto {
+  overflow:auto;
+}
+
+.font-size-100 {
+  font-size: 1rem;
+}
+
+.font-size-75 {
+  font-size: .75rem;
+}
+
 .main-content {
   overflow-y: auto;
   overflow-x: hidden;
   height: 100%;
+  background-color: #E6E6E6;
+}
+
+.ck-main {
+  position: relative;
+}
+
+.ck-split-line {
+  position: absolute;
+  height: 100%;
+  width: 5px;
+  top: 0;
+  left: 230px;
+  cursor: col-resize;
+
+  &:hover {
+    background-color: #999;
+  }
+
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.ck-split-show {
+  background-color: #999;
 }

@@ -30,6 +30,7 @@
   "devDependencies": {
     "@babel/core": "^7.3.4",
     "@babel/plugin-proposal-class-properties": "^7.3.4",
+    "@babel/plugin-proposal-export-default-from": "^7.2.0",
     "@babel/plugin-syntax-dynamic-import": "^7.2.0",
     "@babel/plugin-transform-runtime": "^7.3.4",
     "@babel/preset-env": "^7.3.4",
@@ -67,6 +68,7 @@
     "classnames": "^2.2.6",
     "es6-promise": "^4.2.4",
     "whatwg-fetch": "^3.0.0",
-    "@clake/react-bootstrap4": "^0.8.4"
+    "@clake/react-bootstrap4": "^0.8.8",
+    "@clake/react-bootstrap4-window": "^0.1.8"
   }
 }

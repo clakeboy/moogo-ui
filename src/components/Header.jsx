@@ -18,16 +18,20 @@ class Header extends React.PureComponent {
     }
 
     componentDidMount() {
-        console.log(this.context);
+        // console.log(this.context);
     }
+
+    callback = () => {
+        this.modal.close();
+    };
 
     render() {
         return (
-            <div className='d-flex align-items-center moogo-header'>
+            <div className='d-flex align-items-center moogo-header shadow'>
                 <Button className='ml-2' icon='server' size='sm' onClick={()=>{
                     this.modal.view({
                         title:'服务器列表',
-                        content:<LoaderComponent import={GetComponent} loadPath='/server/List'/>
+                        content:<LoaderComponent import={GetComponent} callback={this.callback} loadPath='/server/List'/>
                     });
                 }}>
                     服务器
