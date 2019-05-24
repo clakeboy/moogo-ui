@@ -5,8 +5,52 @@
   height:100%;
   overflow-y: auto;
   overflow-x: hidden;
+  .table-sm {
+    td,th {
+      padding: .2rem;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
 }
 
 .form-control-xs {
   height: unset;
+}
+
+.ck-xs-btn {
+  padding: 0 .5rem;
+  border: 1px solid #999999;
+  &:hover {
+    background-color: #212529;
+    color: #ffffff;
+  }
+
+  &:active {
+    background-color: #6D7987;
+  }
+
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+
+  border-radius: .25rem;
+}
+
+.ck-data-filter {
+  border: 1px solid #dee2e6;
+  border-radius: .25rem;
+  padding: .25rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.data-filter-column {
+  border-radius: .25rem;
+  padding: 0 .25rem;
+  font-size: .75rem;
+  background-color: #666666;
+  color: #ffffff;
 }

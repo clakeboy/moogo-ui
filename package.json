@@ -47,6 +47,7 @@
     "gulp-babel": "^8.0.0",
     "gulp-header": "^1.8.9",
     "gulp-load-plugins": "^1.5.0",
+    "gulp-sourcemap": "^1.0.1",
     "gulp-util": "^3.0.8",
     "less": "^3.0.4",
     "less-loader": "^4.1.0",
@@ -65,10 +66,11 @@
     "webpack-merge": "^4.1.1"
   },
   "dependencies": {
+    "@clake/react-bootstrap4": "^0.9.5",
+    "@clake/react-bootstrap4-window": "^0.2.3",
     "classnames": "^2.2.6",
     "es6-promise": "^4.2.4",
-    "whatwg-fetch": "^3.0.0",
-    "@clake/react-bootstrap4": "^0.8.8",
-    "@clake/react-bootstrap4-window": "^0.1.8"
+    "react-ace": "^6.5.0",
+    "whatwg-fetch": "^3.0.0"
   }
 }

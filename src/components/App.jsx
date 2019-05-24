@@ -4,7 +4,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import Header from "./Header";
-import Menu from "./Menu";
+import ServerMenu from "./ServerMenu";
 import {CommonContext} from '../context/Common';
 import {
     Common,
@@ -58,6 +58,10 @@ export default class App extends React.Component {
         document.title = title + ' - Go Terminal';
     };
 
+    getModal = ()=>{
+        return this.modal;
+    };
+
     explainUrl(path) {
         let arr = path.split('/');
         arr.shift();
@@ -77,11 +81,11 @@ export default class App extends React.Component {
         // }
         let load_path = this.explainUrl(this.props.location.pathname);
         return (
-            <CommonContext.Provider value={{title:this.setTitle,login:this.setLogin}}>
+            <CommonContext.Provider value={{title:this.setTitle,login:this.setLogin,modal:this.getModal}}>
             <div className='d-flex flex-column h-100'>
                 <Header query={GetQuery(this.props.location.search)} modal={this.modal}/>
                 <div className='d-flex flex-grow-1 ck-main'>
-                    <Menu ref={c=>this.leftDom=c} query={GetQuery(this.props.location.search)}/>
+                    <ServerMenu ref={c=>this.leftDom=c} query={GetQuery(this.props.location.search)}/>
                     <div className='flex-grow-1 main-content'>
                         <LoaderComponent import={GetComponent} closeModal={this.closeModal} loadPath={load_path}/>
                     </div>

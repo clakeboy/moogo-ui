@@ -27,8 +27,8 @@ class Header extends React.PureComponent {
 
     render() {
         return (
-            <div className='d-flex align-items-center moogo-header shadow'>
-                <Button className='ml-2' icon='server' size='sm' onClick={()=>{
+            <div className='d-flex align-items-center moogo-header shadow-sm'>
+                <Button className='ml-1' icon='server' size='sm' onClick={()=>{
                     this.modal.view({
                         title:'服务器列表',
                         content:<LoaderComponent import={GetComponent} callback={this.callback} loadPath='/server/List'/>

@@ -10,7 +10,7 @@ import {
 // import {Tabs,TabsContent} from "../../../react-bootstrap-v4/src/index";
 import MoEvent from "../common/Event";
 import {GET_DATA} from "../common/Events";
-import DataPanel from "./DataPanel";
+import DataPanel from "./data/DataPanel";
 
 class Main extends React.Component {
     constructor(props) {
@@ -28,12 +28,10 @@ class Main extends React.Component {
             list.push(args);
             this.setState({
                 panelList:list,
-                currentShow:`${list.length-1}-${args.server.id}-${args.database}-${args.collection}`
+                currentShow:`${args.server.id}-${args.database}-${args.collection}-${args.tab_id}`
             })
         });
     }
-
-
 
     render() {
         return (
@@ -41,10 +39,16 @@ class Main extends React.Component {
                 <Tabs sm width='100%' height='100%' showTab={this.state.currentShow} onClose={(id,idx)=>{
                     let list = this.state.panelList.slice();
                     list.splice(idx,1);
-                    this.setState({panelList:list,currentShow:null})
+                    let state = {
+                        panelList:list,
+                    };
+                    if (id === this.state.currentShow) {
+                        state.currentShow = null;
+                    }
+                    this.setState(state);
                 }}>
                     {this.state.panelList.map((panel,index)=>{
-                        return <TabsContent id={`${index}-${panel.server.id}-${panel.database}-${panel.collection}`} text={panel.collection}>
+                        return <TabsContent id={`${panel.server.id}-${panel.database}-${panel.collection}-${panel.tab_id}`} text={panel.collection}>
                             <DataPanel server={panel.server} database={panel.database} collection={panel.collection}/>
                         </TabsContent>
                     })}

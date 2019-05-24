@@ -127,7 +127,7 @@ class List extends React.Component {
                         return <ButtonGroup>
                             <Button icon='bolt' outline onClick={()=>{
                                 this.connectServer(row);
-                            }}/>
+                            }}>连接</Button>
                             <Button icon='edit' theme='success' outline onClick={()=>{
                                 this.editServer(row);
                             }}/>
