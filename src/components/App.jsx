@@ -11,9 +11,10 @@ import {
     LoaderComponent,
     Modal,
 } from '@clake/react-bootstrap4';
-import Login from "./Login";
+import Socket from '../common/Socket';
 import {GetComponent, GetQuery} from "../common/Funcs";
 import Drag from "../common/Drag";
+import Main from "../view/Main";
 
 export default class App extends React.Component {
     constructor(props) {
@@ -41,7 +42,8 @@ export default class App extends React.Component {
                 dom.style.width = dragDom.style.left;
                 dragDom.classList.remove('ck-split-show');
             }
-        })
+        });
+        Socket.init();
     }
 
     setLogin = (user, is_login) => {
@@ -55,7 +57,7 @@ export default class App extends React.Component {
         this.setState({
             title: title
         });
-        document.title = title + ' - Go Terminal';
+        document.title = title + ' - Moogo';
     };
 
     getModal = ()=>{
@@ -79,15 +81,16 @@ export default class App extends React.Component {
         // if (!this.state.login) {
         //     return <Login setLogin={this.setLogin}/>
         // }
+        console.log(this.props);
         let load_path = this.explainUrl(this.props.location.pathname);
         return (
             <CommonContext.Provider value={{title:this.setTitle,login:this.setLogin,modal:this.getModal}}>
             <div className='d-flex flex-column h-100'>
                 <Header query={GetQuery(this.props.location.search)} modal={this.modal}/>
-                <div className='d-flex flex-grow-1 ck-main'>
+                <div className='d-flex flex-grow-1 ck-main h-100'>
                     <ServerMenu ref={c=>this.leftDom=c} query={GetQuery(this.props.location.search)}/>
                     <div className='flex-grow-1 main-content'>
-                        <LoaderComponent import={GetComponent} closeModal={this.closeModal} loadPath={load_path}/>
+                        <Main/>
                     </div>
                     <div ref={c=>this.splitDom=c} className='ck-split-line' style={{left:'200px'}}/>
                 </div>

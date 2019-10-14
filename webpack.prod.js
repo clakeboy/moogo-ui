@@ -20,32 +20,50 @@ export default merge(cfg,{
         })
     ],
     module: {
+        // rules: [
+        //     {
+        //         test: /\.css$/,
+        //         use: [MiniCssExtractPlugin.loader,'css-loader'],
+        //         exclude: /node_modules/
+        //     },
+        //     {
+        //         test: /\.less$/,
+        //         use: [MiniCssExtractPlugin.loader,'css-loader','less-loader'],
+        //         // exclude: /node_modules/
+        //     }
+        // ]
         rules: [
             {
                 test: /\.css$/,
-                use: [MiniCssExtractPlugin.loader,'css-loader'],
-                exclude: /node_modules/
+                use: ['style-loader','css-loader']
             },
             {
                 test: /\.less$/,
-                use: [MiniCssExtractPlugin.loader,'css-loader','less-loader'],
-                exclude: /node_modules/
+                use: ['style-loader','css-loader','less-loader']
             }
         ]
     },
-    optimization: {
-        splitChunks: {
-            minSize: 50000,
-            minChunks: 2,
-            cacheGroups: {
-                commonFunc: {
-                    filename:'common.js',
-                    test:/\.js(x?)$/,
-                    chunks: "initial"
-                }
-            }
-        },
-        minimize:true,
-    },
-    mode: 'production',
+    // optimization: {
+    //     // splitChunks: {
+    //     //     minSize: 50000,
+    //     //     minChunks: 2,
+    //     //     cacheGroups: {
+    //     //         commonFunc: {
+    //     //             filename:'common.js',
+    //     //             test:/\.js(x?)$/,
+    //     //             chunks: "initial"
+    //     //         },
+    //     //         styles: {
+    //     //             name: 'main',
+    //     //             test: /\.(le|c)ss$/,
+    //     //             chunks: 'all',
+    //     //             enforce: true
+    //     //         }
+    //     //     }
+    //     // },
+    //     minimize:true,
+    // },
+    // mode: 'production',
+    mode: 'development',
+    devtool: 'eval-source-map',
 });

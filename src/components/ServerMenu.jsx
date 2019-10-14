@@ -5,12 +5,13 @@ import React from 'react';
 import '../assets/css/menu.less';
 import MoEvent from "../common/Event";
 import {
-    Tree,Load,Menu,Icon,Common
+    Tree,Load,Menu,Icon,Common,LoaderComponent
 } from "@clake/react-bootstrap4";
 // import {Tree,Load,Menu} from "../../../react-bootstrap-v4/src/index";
 import Fetch from "../common/Fetch";
 import {CONNECT_SERVER, GET_DATA} from "../common/Events";
 import {CommonContext} from "../context/Common";
+import {GetComponent} from "../common/Funcs";
 
 class ServerMenu extends React.Component {
     constructor(props) {
@@ -37,8 +38,9 @@ class ServerMenu extends React.Component {
         if (!this.modal) {
             this.modal = this.context.modal();
         }
+        return this.modal;
     }
-
+    //加载可连接的服务器列表
     loadConnectServer() {
         this.setState({loading:true},()=>{
             Fetch('/serv/conn/active_connect',{},(res)=>{
@@ -52,7 +54,7 @@ class ServerMenu extends React.Component {
             })
         })
     }
-
+    //连接服务器
     connectServer = (type,server_id,cb)=>{
         Fetch('/serv/conn/connect',{server_id:server_id},(res)=>{
             if (res.status) {
@@ -67,7 +69,7 @@ class ServerMenu extends React.Component {
             cb(false,`${e}`);
         })
     };
-
+    //关闭已连接的服务器
     closeConnect = (e,field,data) => {
         this.getModal();
         this.modal.loading('正在关闭连接中...');
@@ -93,10 +95,9 @@ class ServerMenu extends React.Component {
             </>);
         })
     };
-
+    //刷新服务器列表
     refreshConnect = (e,field,data)=> {
-        this.getModal();
-        this.modal.loading('正在刷新服务器信息...');
+        this.getModal().loading('正在刷新服务器信息...');
         Fetch('/serv/conn/refresh',{server_id:data.serverInfo.id},(res)=>{
             if (res.status) {
                 this.modal.close();
@@ -107,35 +108,120 @@ class ServerMenu extends React.Component {
                 })
             } else {
                 this.modal.alert(<>
-                    <p>关闭服务器出错!</p>
+                    <p>刷新服务器出错!</p>
                     <p>{res.msg}</p>
                 </>);
             }
         },this.netWorkError)
     };
-
+    //打开文档集合
     openCollection = (e,field,data)=>{
         let tab_data = Object.assign({},data.serverInfo);
         tab_data.tab_id = Common.RandomString(8);
         MoEvent.emit(GET_DATA,tab_data);
     };
-
-    doOpen = (menu) => {
-        switch (menu.type) {
+    //克隆文档
+    cloneCollection = (e,field,data) => {
+        this.getModal().view({
+            title:'克隆数据',
+            close:false,
+            content:<LoaderComponent import={GetComponent} src={data.serverInfo} callback={(refresh)=>{
+                this.getModal().close();
+                if (refresh) {
+                    this.refreshConnect(null,null,{
+                        serverInfo:data.serverInfo.server,
+                        serverIndex:data.serverIndex,
+                    })
+                }
+            }} loadPath='/clone/Collection'/>,
+        });
+    };
+    //删除文档集合
+    deleteCollection = (e,field,data) => {
+        this.getModal().confirm({
+            title:'警告',
+            content: `是否真的要删除 Collection: ${data.serverInfo.collection} ?`,
+            callback: (ok)=>{
+                if (!ok) return false;
+                this.getModal().loading('删除文档集合中...');
+                Fetch('/serv/coll/delete',{
+                    server_id: data.serverInfo.server.id,
+                    database: data.serverInfo.database,
+                    collection: data.serverInfo.collection,
+                },(res)=>{
+                    if (res.status) {
+                        this.getModal().alert(`删除文档集合 ${data.serverInfo.collection} 成功!`,()=>{
+                            this.refreshConnect(null,null,{
+                                serverInfo:data.serverInfo.server,
+                                serverIndex:data.serverIndex,
+                            });
+                        });
+                    } else {
+                        this.getModal().alert(`删除文档集合 ${data.serverInfo.collection} 失败!`);
+                    }
+                },this.netWorkError)
+            }
+        });
+    };
+    //树菜单双击功能
+    doOpen = (tree) => {
+        switch (tree.type) {
             case "collection":
-                let tab_data = Object.assign({},menu.data);
+                let tab_data = Object.assign({},tree.data);
                 tab_data.tab_id = Common.RandomString(8);
                 MoEvent.emit(GET_DATA,tab_data);
                 break;
             case "indexed":
                 break;
         }
-        return menu.type !== 'collection';
+        return tree.type !== 'collection'; //返回false停止执行树菜单展开动作
+    };
+    //添加索引
+    addIndex = (e,field,data) => {
+        this.getModal().view({
+            title:'添加索引',
+            content:<LoaderComponent import={GetComponent} data={data.serverInfo} isAdd={true} callback={()=>{
+                this.getModal().close();
+            }} loadPath='/index/IndexEdit'/>,
+        });
+    };
+    //编辑索引
+    editIndex = (e,field,data) => {
+        this.getModal().view({
+            title:'编辑索引',
+            content:<LoaderComponent import={GetComponent} data={data.serverInfo} isAdd={false} callback={()=>{
+                this.getModal().close();
+            }} loadPath='/index/IndexEdit'/>,
+        });
+    };
+    //删除索引
+    deleteIndex = (e,field,data) => {
+        console.log(data);
+        this.getModal().confirm({
+            content:<span>确定要删除[<span className='text-danger'>{data.serverInfo.index}</span>]索引?</span>,
+            callback:(flag)=>{
+                if (flag === 1) {
+                    this.getModal().loading('正在删除索引...');
+                    Fetch('/serv/index/delete',{
+                        server_id:data.serverInfo.server.id,
+                        database:data.serverInfo.database,
+                        collection:data.serverInfo.collection,
+                        name:data.serverInfo.index
+                    },(res)=>{
+                        this.getModal().close();
+                        if (res.status) {
+                            this.getModal().alert('删除索引成功!');
+                        } else {
+                            this.getModal().alert(`删除索引出错!: ${res.msg}`);
+                        }
+                    },this.netWorkError);
+                }
+            }
+        });
     };
 
     netWorkError = (e) => {
-        this.getModal();
-        this.modal.alert(<>
+        this.getModal().alert(<>
             <p>访问网络出错!</p>
             <p>{e}</p>
         </>);
@@ -147,8 +233,10 @@ class ServerMenu extends React.Component {
         }
         return (
             <div className='moogo-menu' >
-                {this.state.serverList.length > 0?this.renderServerTree():this.renderEmpty()}
-                {this.renderMenu()}
+                <div className='moogo-menu-content'>
+                    {this.state.serverList.length > 0?this.renderServerTree():this.renderEmpty()}
+                    {this.renderMenu()}
+                </div>
             </div>
         );
     }
@@ -214,24 +302,27 @@ class ServerMenu extends React.Component {
                 <Menu.Item field="open_collection" onClick={this.openCollection}>
                     打开数据列表
                 </Menu.Item>
+                <Menu.Item field="open_collection" onClick={this.cloneCollection}>
+                    克隆数据表
+                </Menu.Item>
+                <Menu.Item field="open_collection" onClick={this.deleteCollection}>
+                    删除数据表
+                </Menu.Item>
                 <Menu.Item step/>
                 <Menu.Item field="open_collection" onClick={null}>
                     添加数据
                 </Menu.Item>
-                <Menu.Item field="open_collection" onClick={null}>
-                    克隆数据表
-                </Menu.Item>
-                <Menu.Item field="open_collection" onClick={null}>
-                    删除数据表
+                <Menu.Item field="open_collection" onClick={this.addIndex}>
+                    添加索引
                 </Menu.Item>
             </Menu>
             <Menu ref={c=>this.indexMenu=c} onClick={(key)=>{
                 console.log(key);
             }}>
-                <Menu.Item field="open_collection" onClick={null}>
+                <Menu.Item field="open_collection" onClick={this.editIndex}>
                     编辑索引
                 </Menu.Item>
-                <Menu.Item field="open_collection" onClick={null}>
+                <Menu.Item field="open_collection" onClick={this.deleteIndex}>
                     删除索引
                 </Menu.Item>
             </Menu>

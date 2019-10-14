@@ -139,7 +139,11 @@ class DataPanel extends React.PureComponent {
     showData = (e,field,data)=>{
         this.context.modal().view({
             title:'修改数据',
-            content:<LoaderComponent import={GetComponent} data={data} callback={()=>{
+            content:<LoaderComponent import={GetComponent} conn={{
+                server:this.server,
+                database:this.database,
+                collection:this.collection,
+            }} data={data} callback={()=>{
                 this.context.modal().close();
             }} loadPath='/data/DataEdit'/>,
         });

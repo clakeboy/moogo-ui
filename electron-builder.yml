@@ -1,0 +1,38 @@
+appId: "com.ck.actoreact"
+productName: "ck-actoreact"
+directories:
+  output: "build"
+files:
+  - "app/**/*"
+asarUnpack:
+  - "app/accesscmd/**/*"
+#extraResources:
+#  - from: "static"
+#    to: "static"
+#    filter:
+#      - "**/*"
+dmg:
+  contents:
+    - x: 410
+      y: 150
+      type: "link"
+      path: "/Applications"
+    - x: 130
+      y: 150
+      type: "file"
+mac:
+  category: "ck.app.actoreact"
+  icon: "static/icons/app.icns"
+  target:
+    - "zip"
+    - "dmg"
+win:
+  icon: "static/app.ico"
+  target:
+#    - "nsis"
+    - "zip"
+linux:
+  icon: "static/app.ico"
+nsis:
+  oneClick: true
+  artifactName: "${productName}-setup-${version}.${ext}"

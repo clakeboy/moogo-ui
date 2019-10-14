@@ -44,7 +44,7 @@ gulp.task('server', () => {
     bs.init({
         logPrefix: 'AMT',
         server: {
-            baseDir: ['dist'],
+            baseDir: ['app/ui'],
             middleware: [
                 historyApiFallback(),
                 webpackDevMiddleware(bundler, {
@@ -66,32 +66,17 @@ gulp.task('server', () => {
 
 gulp.task('clean', () => {
     return del([
-        'dist/*',
-        '!dist/vendor',
-        '!dist/index.html',
-        '!dist/manage.html',
-        '!dist/static',
-        '!dist/favicon.ico'
+        'app/ui/*',
+        '!app/ui/vendor',
+        '!app/ui/index.html',
+        '!app/ui/manage.html',
+        '!app/ui/static',
+        '!app/ui/favicon.ico'
     ]);
 });
 
 gulp.task('build:pack', (callback)=>{
-    let webpackConfig = require('./webpack.common').default;
-// return gulp.src('dist/*.js')
-//     .pipe(replaceVersion())
-//     .pipe(addBanner())
-//     // .pipe($.rename('ticket_manage.min.js'))
-//     // .pipe(gulp.dest(paths.dist))
-//     .pipe($.rename({suffix: '.min'}))
-//     .pipe(gulp.dest(paths.dist));
-// gulp.start('webpack');
-// webpackStream(webpackConfig,null, function(err, stats) {
-//     if(err) throw new gutil.PluginError("webpack", err);
-//     gutil.log("[webpack]", stats.toString({
-//         color:true
-//     }));
-//     callback();
-// });
+    let webpackConfig = require('./webpack.prod').default;
     webpack(webpackConfig,function(err,stats){
         gutil.log("[webpack]", stats.toString({
             colors:true

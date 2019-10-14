@@ -30,10 +30,10 @@ class DataFilter extends React.Component {
 
         this.filterConditions = [
             {text:'=',key:'$eq'},
-            {text:'>',key:'$lt'},
-            {text:'>=',key:'$lte'},
-            {text:'<',key:'$gt'},
-            {text:'<=',key:'$gte'},
+            {text:'<',key:'$lt'},
+            {text:'<=',key:'$lte'},
+            {text:'>',key:'$gt'},
+            {text:'>=',key:'$gte'},
             {text:'!=',key:'$ne'},
             {text:'re',key:'$regex'},
         ];

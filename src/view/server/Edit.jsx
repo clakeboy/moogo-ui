@@ -37,6 +37,7 @@ class Edit extends React.PureComponent {
             is_auth:false,
             is_ssh:false,
             is_save:false,
+            showTab:'server',
         };
         this.edit = false;
     }
@@ -135,7 +136,7 @@ class Edit extends React.PureComponent {
         return (
             <div>
                 <Form onChange={this.changeHandler}>
-                    <Tabs>
+                    <Tabs showTab={this.state.showTab} onSelect={(id)=>{this.setState({showTab:id})}}>
                         <TabsContent id='server' text='服务器'>
                             <div className="p-3">
                                 <div className="form-row">
