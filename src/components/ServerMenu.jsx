@@ -5,7 +5,7 @@ import React from 'react';
 import '../assets/css/menu.less';
 import MoEvent from "../common/Event";
 import {
-    Tree,Load,Menu,Icon,Common,LoaderComponent
+    Tree,Load,Menu,Icon,Common,LoaderComponent,Scroll
 } from "@clake/react-bootstrap4";
 // import {Tree,Load,Menu} from "../../../react-bootstrap-v4/src/index";
 import Fetch from "../common/Fetch";
@@ -49,8 +49,8 @@ class ServerMenu extends React.Component {
                 } else {
                     this.setState({loading:false})
                 }
-            },()=>{
-
+            },(e)=>{
+                this.setState({loading:false})
             })
         })
     }
@@ -113,6 +113,50 @@ class ServerMenu extends React.Component {
                 </>);
             }
         },this.netWorkError)
+    };
+    //创建数据库
+    createDatabase = (e,field,data) => {
+        this.getModal().view({
+            title:'新建数据库',
+            size:'def',
+            content:<LoaderComponent import={GetComponent} conn={data.serverInfo} data={this.state.serverList[data.serverIndex]} callback={(update)=>{
+                this.getModal().close();
+                if (update) {
+                    this.setState({
+                        serverList:this.state.serverList
+                    })
+                }
+            }} loadPath='/database/Create'/>,
+        });
+    };
+    //删除数据库
+    deleteDatabase = (e,field,data) => {
+        this.getModal().confirm({
+            title:'警告',
+            content: `是否真的要数据库 Database: ${data.serverInfo.database} ?`,
+            callback: (ok)=>{
+                if (!ok) return false;
+                this.getModal().loading('删除数据库中...');
+                Fetch('/serv/database/drop',{
+                    server_id: data.serverInfo.server.id,
+                    database: data.serverInfo.database
+                },(res)=>{
+                    if (res.status) {
+                        this.getModal().alert(`删除数据库 ${data.serverInfo.database} 成功!`,()=>{
+                            this.refreshConnect(null,null,{
+                                serverInfo:data.serverInfo.server,
+                                serverIndex:data.serverIndex,
+                            });
+                        });
+                    } else {
+                        this.getModal().alert(<>
+                            <p>{`删除数据库 ${data.serverInfo.collection} 出错!`}</p>
+                            <p>{res.msg}</p>
+                        </>);
+                    }
+                },this.netWorkError)
+            }
+        });
     };
     //打开文档集合
     openCollection = (e,field,data)=>{
@@ -219,7 +263,55 @@ class ServerMenu extends React.Component {
             }
         });
     };
-
+    //导出bson
+    exportBson = (e,field,data) => {
+        this.getModal().view({
+            title:'导出数据 Bson',
+            close:false,
+            content:<LoaderComponent import={GetComponent} conn={data.serverInfo} callback={()=>{
+                this.getModal().close();
+            }} loadPath='/export/Bson'/>,
+        });
+    };
+    //导入
+    importData = (e,field,data) => {
+        this.getModal().view({
+            title:'数据导入',
+            close:false,
+            content:<LoaderComponent import={GetComponent} conn={data.serverInfo} callback={(refresh)=>{
+                this.getModal().close();
+                if (refresh) {
+                    this.refreshConnect(null,null,{
+                        serverInfo:data.serverInfo.server,
+                        serverIndex:data.serverIndex,
+                    })
+                }
+            }} loadPath='/import/Bson'/>,
+        });
+    };
+    //创建文档集合 collection
+    createCollection = (e,field,data) => {
+        this.getModal().view({
+            title:'创建文档集合',
+            size:'def',
+            content:<LoaderComponent import={GetComponent} conn={data.serverInfo} callback={(refresh)=>{
+                this.getModal().close();
+                this.refreshConnect(null,null,{
+                    serverInfo:data.serverInfo.server,
+                    serverIndex:data.serverIndex,
+                })
+            }} loadPath='/collection/Create'/>,
+        });
+    };
+    //添加文档
+    addData = (e,field,data) => {
+        this.getModal().view({
+            title:'添加数据',
+            content:<LoaderComponent import={GetComponent} conn={data.serverInfo} mode='add' callback={()=>{
+                this.getModal().close();
+            }} loadPath='/data/DataEdit'/>,
+        });
+    };
     netWorkError = (e) => {
         this.getModal().alert(<>
             <p>访问网络出错!</p>
@@ -232,11 +324,12 @@ class ServerMenu extends React.Component {
             return this.renderLoading();
         }
         return (
-            <div className='moogo-menu' >
-                <div className='moogo-menu-content'>
+            <div className='moogo-menu'>
+                <div className='moogo-menu-content' >
                     {this.state.serverList.length > 0?this.renderServerTree():this.renderEmpty()}
                     {this.renderMenu()}
                 </div>
+                <Scroll selector='.moogo-menu-content'/>
             </div>
         );
     }
@@ -276,6 +369,11 @@ class ServerMenu extends React.Component {
                         serverIndex:idx,
                         serverInfo:item.data
                     }});
+                } else if (item.type === 'database') {
+                    this.dbMenu.show({evt:e,type:'mouse',data:{
+                        serverIndex:idx,
+                        serverInfo:item.data
+                    }});
                 }
             }}/>
         });
@@ -286,6 +384,10 @@ class ServerMenu extends React.Component {
             <Menu ref={c=>this.connectMenu=c} onClick={(key)=>{
                 console.log(key);
             }}>
+                <Menu.Item field="refresh" onClick={this.createDatabase}>
+                    <Icon className='pr-1' icon='plus'/>
+                    新建数据库
+                </Menu.Item>
                 <Menu.Item field="refresh" onClick={this.refreshConnect}>
                     <Icon className='pr-1' icon='sync-alt'/>
                     刷新服务器
@@ -309,7 +411,7 @@ class ServerMenu extends React.Component {
                     删除数据表
                 </Menu.Item>
                 <Menu.Item step/>
-                <Menu.Item field="open_collection" onClick={null}>
+                <Menu.Item field="open_collection" onClick={this.addData}>
                     添加数据
                 </Menu.Item>
                 <Menu.Item field="open_collection" onClick={this.addIndex}>
@@ -324,6 +426,24 @@ class ServerMenu extends React.Component {
                 </Menu.Item>
                 <Menu.Item field="open_collection" onClick={this.deleteIndex}>
                     删除索引
+                </Menu.Item>
+            </Menu>
+            <Menu ref={c=>this.dbMenu=c} onClick={(key)=>{
+                console.log(key);
+            }}>
+                <Menu.Item field="add_database" onClick={this.createCollection}>
+                    添加数据集合
+                </Menu.Item>
+                <Menu.Item field="drop_database" onClick={this.deleteDatabase}>
+                    删除数据库
+                </Menu.Item>
+                <Menu.Item step/>
+                <Menu.Item field="import_database" onClick={this.importData}>
+                    导入数据
+                </Menu.Item>
+                <Menu.Item field="export_database" text='导出数据' child>
+                    <Menu.Item onClick={this.exportBson}>导出 bson</Menu.Item>
+                    <Menu.Item onClick={null}>导出 csv</Menu.Item>
                 </Menu.Item>
             </Menu>
         </>)

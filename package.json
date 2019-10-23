@@ -8,7 +8,8 @@
     "clean": "gulp clean",
     "start-web": "NODE_ENV=development gulp",
     "pack-web": "NODE_ENV=production gulp build",
-    "start-app-debug": "electron app/main.js debug",
+    "start-app-web-debug": "electron app/main.js debug",
+    "start-app-debug": "electron app/main.js appdebug",
     "start-app": "electron app/main.js",
     "build-win": "electron-builder --win --x64",
     "build-mac": "electron-builder --mac --x64",
@@ -71,7 +72,7 @@
     "electron-packager": "^14.0.6"
   },
   "dependencies": {
-    "@clake/react-bootstrap4": "^0.9.19",
+    "@clake/react-bootstrap4": "^0.9.25",
     "@clake/react-bootstrap4-window": "^0.2.3",
     "classnames": "^2.2.6",
     "es6-promise": "^4.2.4",

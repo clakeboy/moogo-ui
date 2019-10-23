@@ -4,9 +4,12 @@ const {dialog} = remote;
 const path = require('path');
 const os = require('os');
 const fs = require('fs');
-const accesscmd = path.join(__dirname.replace('app.asar', 'app.asar.unpacked'),'accesscmd/AccessExport.exe');
-const convertcmd = path.join(__dirname.replace('app.asar', 'app.asar.unpacked'),'accesscmd/Convert.exe');
+
 const tmpDir = path.join(os.tmpdir(),'actojs/');
+
+const programName = remote.process.platform === 'windows' ? 'moogo.exe':'moogo_'+remote.process.platform;
+
+const program = path.join(__dirname.replace('app.asar', 'app.asar.unpacked'),'cmd/'+programName);
 
 if (!fs.existsSync(tmpDir)) {
     fs.mkdirSync(tmpDir);
@@ -17,16 +20,20 @@ window.remote = {
     openFile : (cb)=>{
         // let win  = ipcRenderer.sendSync('getMainWindow','');
         console.log(dialog.showOpenDialog(remote.getCurrentWindow(),{
-            title:'Choose file', properties: ['openFile'],
+            title:'选择文件', properties: ['openFile'],
             filters:[
-                { name: 'Access', extensions: ['mdb', 'acdb'] }
+                { name: 'compress', extensions: ['tgz'] }
             ]
         },cb));
     },
     openDirectory: (cb)=>{
         // let win  = ipcRenderer.sendSync('getMainWindow','');
         // console.log(dialog.showSaveDialog(win,{title:'choose directory'},cb));
-        console.log(dialog.showOpenDialog(remote.getCurrentWindow(),{title:'Choose directory', properties: ['openDirectory']},cb));
+        console.log(dialog.showOpenDialog(remote.getCurrentWindow(),{
+            title:'选择目录',
+            properties: ['openDirectory']},
+            cb
+        ));
     },
     getWindowList: (file,cb)=>{
         let AccessExport = spawn(accesscmd,['-f',file,'--windows']);
@@ -57,43 +64,12 @@ window.remote = {
             AccessExport.kill();
         });
     },
-    exportAccess: (file,wfile,exportDir,cb)=>{
-        window.remote.clearTmpDir();
-        let AccessExport = spawn(accesscmd,['-f',file,'-w',wfile,'-d',tmpDir]);
-        AccessExport.stdout.on('data', (data) => {
-            cb(data.toString());
-        });
-        AccessExport.stderr.on('data', (data) => {
-            console.log(`stderr: ${data}`);
-        });
+    runCmd: (cb)=>{
+        let AccessExport = spawn(program,[]);
         AccessExport.on('exit',()=>{
             // cb('done',true);
             AccessExport.kill();
-            setTimeout(()=>{window.remote.convert(exportDir,cb);},1000);
-        });
-    },
-    exportSelected: (file,wfile,exportDir,filter,cb)=>{
-        window.remote.clearTmpDir();
-
-        let AccessExport = spawn(accesscmd,['-f',file,'-w',wfile,'-d',tmpDir,'--filter',filter.join(',')]);
-        AccessExport.stdout.on('data', (data) => {
-            cb(data.toString());
-        });
-        AccessExport.stderr.on('data', (data) => {
-            console.log(`stderr: ${data}`);
-        });
-        AccessExport.on('error', (data) => {
-            console.log(`error: ${data}`);
-        });
-        AccessExport.on('close',()=>{
-            console.log('export close');
-
-            // cb('done',true);
-        });
-        AccessExport.on('exit',()=>{
-            console.log('export exit');
-            AccessExport.kill();
-            setTimeout(()=>{window.remote.convert(exportDir,cb);},1000);
+            setTimeout(()=>{cb('exit')},1000);
         });
     },
     convert: (exportDir,cb) => {

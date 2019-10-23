@@ -7,6 +7,7 @@ let eventList = {};
 let evt_types = {
     CLONE_COLLECTION:'clone_coll',
     BACKUP_DATABASE:'backup',
+    IMPORT_DATA:'import',
 };
 
 function _init(url,opt) {

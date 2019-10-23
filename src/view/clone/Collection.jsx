@@ -174,7 +174,7 @@ class Collection extends React.PureComponent {
     render() {
         return (
             <div>
-                <Card header='数据源' className='mb-1'>
+                <Card header='数据源' className='mb-2'>
                     <div className='row'>
                         <div className='col'>
                             <Input textClass='text-primary' label={<>服务器连接<Icon className='ml-1' icon='server'/></>} plaintext
@@ -190,7 +190,7 @@ class Collection extends React.PureComponent {
                         </div>
                     </div>
                 </Card>
-                <Card header='目的源' className='mb-1'>
+                <Card header='目的源' className='mb-2'>
                     <div className='row'>
                         <div className='col'>
                             <Input textClass='text-primary' readOnly disabled={this.state.process} label={<>已连接服务器列表<Icon className='ml-1' icon='server'/></>}
@@ -223,7 +223,8 @@ class Collection extends React.PureComponent {
                             />
                         </div>
                         <div className='col'>
-                            <Input textClass='text-primary' disabled={this.state.process} label={<>数据库<Icon className='ml-1' icon='database'/></>}
+                            <Input textClass='text-primary' disabled={this.state.process} summary='创建新数据库请直接输入数据库名'
+                                   label={<>数据库<Icon className='ml-1' icon='database'/></>}
                                    data={this.state.destSrc.database}
                                    combo={{
                                        width:'100%',
@@ -244,7 +245,7 @@ class Collection extends React.PureComponent {
                                    }}
                                    onChange={(val,row)=>{
                                        let data = this.state.destSrc;
-                                       data.database = row.name;
+                                       data.database = val;
                                        this.setState({
                                            destSrc:data,
                                        })
@@ -279,7 +280,7 @@ class Collection extends React.PureComponent {
 
     renderProcess() {
         return (
-            <Card className='mb-1'>
+            <Card className='mb-2'>
                 <div className="progress">
                     <div className="progress-bar progress-bar-striped progress-bar-animated" style={{width:this.state.processData.percentage+'%'}}>
                         ( {this.state.processData.current} / {this.state.processData.total} ) {this.state.processData.percentage}%

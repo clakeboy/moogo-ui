@@ -136,6 +136,19 @@ class DataPanel extends React.PureComponent {
         }
     }
 
+    addData = (e,field,data) => {
+        this.context.modal().view({
+            title:'添加数据',
+            content:<LoaderComponent import={GetComponent} conn={{
+                server:this.server,
+                database:this.database,
+                collection:this.collection,
+            }} mode='add' callback={()=>{
+                this.context.modal().close();
+            }} loadPath='/data/DataEdit'/>,
+        });
+    };
+
     showData = (e,field,data)=>{
         this.context.modal().view({
             title:'修改数据',
@@ -143,14 +156,38 @@ class DataPanel extends React.PureComponent {
                 server:this.server,
                 database:this.database,
                 collection:this.collection,
-            }} data={data} callback={()=>{
+            }} mode='modify' data={data} callback={()=>{
                 this.context.modal().close();
             }} loadPath='/data/DataEdit'/>,
         });
     };
 
     deleteData = (e,field,data) => {
-
+        this.modal.confirm({
+            title:'警告',
+            content: `是否真的要删除文档: {"_id":"${data.data._id}"} ?`,
+            callback: (ok)=>{
+                if (!ok) return false;
+                this.modal.loading('删除文档中...');
+                Fetch('/serv/exec/delete',{
+                    server_id: this.server.id,
+                    database: this.database,
+                    collection: this.collection,
+                    id: data.data._id,
+                },(res)=>{
+                    if (res.status) {
+                        this.modal.alert({
+                            content:`删除文档 ${data.data._id} 成功!`,
+                            callback:()=>{
+                                this.loadData(1);
+                            }
+                        });
+                    } else {
+                        this.modal.alert(`删除文档 ${data.data._id} 失败!`);
+                    }
+                })
+            }
+        });
     };
 
     sortHandler = (field,sort_type)=>{
@@ -261,6 +298,11 @@ class DataPanel extends React.PureComponent {
 
     renderData() {
         let menu = [
+            {
+                field:'add',
+                text: <><Icon className='pr-1' icon='plus'/>添加数据</>,
+                click: this.addData,
+            },
             {
                 field:'editor',
                 text: <><Icon className='pr-1' icon='edit'/>编辑数据</>,

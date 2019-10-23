@@ -81,7 +81,7 @@ export default class App extends React.Component {
         // if (!this.state.login) {
         //     return <Login setLogin={this.setLogin}/>
         // }
-        console.log(this.props);
+        // console.log(this.props);
         let load_path = this.explainUrl(this.props.location.pathname);
         return (
             <CommonContext.Provider value={{title:this.setTitle,login:this.setLogin,modal:this.getModal}}>

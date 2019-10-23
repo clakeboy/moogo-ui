@@ -1,5 +1,5 @@
-appId: "com.ck.actoreact"
-productName: "ck-actoreact"
+appId: "ck.moogo"
+productName: "moogo"
 directories:
   output: "build"
 files:
@@ -21,8 +21,8 @@ dmg:
       y: 150
       type: "file"
 mac:
-  category: "ck.app.actoreact"
-  icon: "static/icons/app.icns"
+  category: "ck.app.moogo"
+  icon: "static/app.ico"
   target:
     - "zip"
     - "dmg"
