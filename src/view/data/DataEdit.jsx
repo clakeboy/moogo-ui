@@ -32,7 +32,7 @@ class DataEdit extends React.PureComponent {
             identifierRegexps: [/[a-zA-Z_0-9\.\$\-\u00A2-\uFFFF]/],
             getCompletions: function(editor, session, pos, prefix, callback) {
                 let coords = editor.renderer.textToScreenCoordinates(pos.row, pos.column);
-                console.log(coords);
+                // console.log(coords);
                 callback(null, [
                     {
                         caption: 'users',
@@ -43,7 +43,7 @@ class DataEdit extends React.PureComponent {
             }
         });
         if (this.mode === 'modify')
-            this.load(this.props.data.data._id);
+            this.load(this.props.data.data._id,this.props.idType);
     }
 
     componentWillReceiveProps(nextProps, nextContext) {
@@ -53,7 +53,7 @@ class DataEdit extends React.PureComponent {
         this.mode = nextProps.mode;
         this.conn = nextProps.conn;
         if (this.mode === 'modify')
-            this.load(nextProps.data.data._id);
+            this.load(nextProps.data.data._id,nextProps.idType);
     }
 
     saveHandler = () => {
@@ -66,13 +66,14 @@ class DataEdit extends React.PureComponent {
         }
     };
 
-    load(id) {
+    load(id,type) {
         this.modal.loading('加载数据中...');
         Fetch("/serv/exec/find",{
             server_id:this.conn.server.id,
             database:this.conn.database,
             collection:this.conn.collection,
-            id:id
+            id:id,
+            id_type:type.type
         },(res)=>{
             this.modal.close();
             if (res.status) {

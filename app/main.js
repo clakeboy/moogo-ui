@@ -8,6 +8,8 @@ let debug = process.argv[2] === 'debug';
 let appDebug = process.argv[2] === 'appdebug';
 
 let appPkg = require("../package.json");
+//子进程
+let sub_process;
 
 function createWindow() {
     const path = require('path');
@@ -48,38 +50,38 @@ function createWindow() {
             ...(isMac ? [{
                 label: app.getName(),
                 submenu: [
-                    { role: 'about' },
+                    { role: 'about',label:'关于' },
                     { type: 'separator' },
-                    { role: 'services' },
+                    { role: 'services' ,label:'服务' },
                     { type: 'separator' },
-                    { role: 'hide' },
-                    { role: 'hideothers' },
-                    { role: 'unhide' },
+                    { role: 'hide' ,label:'隐藏' },
+                    { role: 'hideothers',label:'隐藏其它' },
+                    { role: 'unhide' ,label:'显示所有' },
                     { type: 'separator' },
-                    { role: 'quit' }
+                    { role: 'quit',label:'退出 '+ app.getName() }
                 ]
             }] : []),
             // { role: 'fileMenu' }
             {
-                label: 'File',
+                label: '文件',
                 submenu: [
-                    isMac ? { role: 'close' } : { role: 'quit' }
+                    isMac ? { label:'关闭窗口',role: 'close' } : { label:'关闭窗口',role: 'quit' }
                 ]
             },
             // { role: 'editMenu' }
             {
-                label: 'Edit',
+                label: '编辑',
                 submenu: [
-                    { role: 'undo' },
-                    { role: 'redo' },
+                    { role: 'undo' ,label:'撤销'},
+                    { role: 'redo' ,label:'复原'},
                     { type: 'separator' },
-                    { role: 'cut' },
-                    { role: 'copy' },
-                    { role: 'paste' }
+                    { role: 'cut' ,label:'剪切'},
+                    { role: 'copy' ,label:'复制'},
+                    { role: 'paste',label:'粘贴' }
                 ]
             },
             ...(debug || appDebug ? [{
-                label: 'View',
+                label: '视图',
                 submenu: [
                     { role: 'reload' },
                     { role: 'forcereload' },
@@ -94,17 +96,17 @@ function createWindow() {
             }] : []),
             // { role: 'windowMenu' }
             {
-                label: 'Window',
+                label: '窗口',
                 submenu: [
-                    { role: 'minimize' },
-                    { role: 'zoom' },
+                    { role: 'minimize' ,label:'最小化'},
+                    { role: 'zoom' ,label:'缩放'},
                     ...(isMac ? [
                         { type: 'separator' },
-                        { role: 'front' },
+                        { role: 'front' ,label:'前置所有窗口'},
                         { type: 'separator' },
-                        { role: 'window' }
+                        { role: 'window' ,label:'窗口'}
                     ] : [
-                        { role: 'close' }
+                        { role: 'close' ,label:'关闭窗口'}
                     ])
                 ]
             }
@@ -115,24 +117,38 @@ function createWindow() {
     } else {
         Menu.setApplicationMenu(null)
     }
-    runCmd(()=>{
 
+    !debug && runCmd((text)=>{
+        console.log(text);
     });
 }
 function runCmd(cb) {
     const spawn = require('child_process').spawn;
     const path = require('path');
-    const programName = process.platform === 'windows' ? 'moogo.exe':'moogo_'+process.platform;
+    const programName = process.platform === 'win32' ? 'moogo.exe':'moogo_'+process.platform;
 
     const program = path.join(__dirname.replace('app.asar', 'app.asar.unpacked'),'cmd/'+programName);
-
-    let AccessExport = spawn(program,['--debug','--config','main.conf']);
-    AccessExport.stdout.on('data', (data) => {
+    let argv = ['--cross','--config','./main.conf'];
+    debug && argv.push('--debug');
+    sub_process = spawn(program,argv,{
+        cwd:path.dirname(program),
+    });
+    sub_process.stdout.on('data', (data) => {
         console.log(data.toString());
     });
-    AccessExport.on('exit',()=>{
+    sub_process.stderr.on('data', (data) => {
+        console.log(`stderr: ${data}`);
+    });
+    sub_process.on('error', (data) => {
+        console.log(`error: ${data}`);
+    });
+    sub_process.on('close',(code)=>{
+        console.log('export close',code);
         // cb('done',true);
-        AccessExport.kill();
+    });
+    sub_process.on('exit',()=>{
+        // cb('done',true);
+        sub_process.kill();
         setTimeout(()=>{cb('exit')},1000);
     });
 }
@@ -160,6 +176,10 @@ app.on('activate', function () {
     if (mainWindow === null) {
         createWindow()
     }
+});
+
+app.on('quit',function () {
+    sub_process.kill();
 });
 
 // In this file you can include the rest of your app's specific main process

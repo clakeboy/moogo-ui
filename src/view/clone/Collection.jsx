@@ -11,6 +11,7 @@ import {
 } from '@clake/react-bootstrap4';
 import Fetch from "../../common/Fetch";
 import Socket from '../../common/Socket';
+import moment from 'moment';
 
 class Collection extends React.PureComponent {
     constructor(props) {
@@ -34,8 +35,11 @@ class Collection extends React.PureComponent {
                 current:0,
                 total:0,
                 percentage: 0,
-            }
+            },
+            process_time:'',
         };
+        this.timeClock = null;
+        this.startTime = null;
     }
 
     componentDidMount() {
@@ -48,7 +52,9 @@ class Collection extends React.PureComponent {
 
     closeHandler = ()=>{
         if (this.state.process) {
-            Socket.emit(Socket.evtTypes.CLONE_COLLECTION,{code: 'cancel'})
+            Socket.emit(Socket.evtTypes.CLONE_COLLECTION,{code: 'cancel'},()=>{
+                this.cancel()
+            })
         } else {
             this.props.callback();
         }
@@ -96,7 +102,8 @@ class Collection extends React.PureComponent {
             return false;
         }
 
-        if (this.state.destSrc.database === this.state.src.database
+        if (this.state.destSrc.server_id === this.state.src.server_id
+            && this.state.destSrc.database === this.state.src.database
             && this.state.destSrc.collection === this.state.src.collection) {
             this.modal.alert("同数据库内不能有相同的数据集合名!");
             return false;
@@ -122,6 +129,7 @@ class Collection extends React.PureComponent {
     };
 
     start(res) {
+        this.startTime = moment().minutes(0).seconds(0).hours(0);
         this.setState({
             process:true,
             processData:{
@@ -129,6 +137,13 @@ class Collection extends React.PureComponent {
                 total:res.data.total,
                 percentage: Math.round(res.data.current/res.data.total*100),
             }
+        },()=>{
+            this.timeClock = setInterval(()=>{
+                this.startTime.add(1, 's');
+                this.setState({
+                    process_time:this.startTime.format("HH:mm:ss")
+                })
+            },1000);
         });
     }
 
@@ -143,27 +158,28 @@ class Collection extends React.PureComponent {
     }
 
     complete(res) {
+        clearInterval(this.timeClock);
         this.setState({
             process:false
         },()=>{
-            this.modal.alert('克隆数据完成!',()=>{
+            this.modal.alert(<>
+                <p>克隆数据完成!</p>
+                <p>{this.state.process_time}</p>
+            </>,()=>{
                 this.props.callback(true);
             });
         });
     }
 
     cancel() {
-        Socket.emit(Socket.evtTypes.CLONE_COLLECTION,data,(data)=>{
-            let res = JSON.parse(data);
-            if (res.code === 'start') {
-                this.start(res);
-            } else {
-                this.error(res)
-            }
+        clearInterval(this.timeClock);
+        this.setState({
+            process:false
         })
     }
 
     error(res) {
+        clearInterval(this.timeClock);
         this.setState({
             process:false
         },()=>{
@@ -282,6 +298,7 @@ class Collection extends React.PureComponent {
         return (
             <Card className='mb-2'>
                 <div className="progress">
+                    已用时: {this.state.process_time}
                     <div className="progress-bar progress-bar-striped progress-bar-animated" style={{width:this.state.processData.percentage+'%'}}>
                         ( {this.state.processData.current} / {this.state.processData.total} ) {this.state.processData.percentage}%
                     </div>

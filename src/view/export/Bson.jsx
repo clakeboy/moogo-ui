@@ -8,10 +8,11 @@ import {
     Modal,
     Input,
     Card,
-    Button
+    Button,
 } from '@clake/react-bootstrap4';
 import Fetch from "../../common/Fetch";
 import Socket from "../../common/Socket";
+import moment from 'moment';
 
 class Bson extends React.Component {
     constructor(props) {
@@ -21,8 +22,11 @@ class Bson extends React.Component {
             data:null,
             export_dir:"",
             process:false,
-            process_data:{}
+            process_data:{},
+            process_time:'',
         };
+        this.timeClock = null;
+        this.startTime = null;
     }
 
     componentDidMount() {
@@ -82,7 +86,6 @@ class Bson extends React.Component {
         if (!list) {
             return
         }
-
         let data = {
             server:{
                 server_id:this.conn.server.id,
@@ -138,6 +141,7 @@ class Bson extends React.Component {
     };
 
     start(res) {
+        this.startTime = moment().minutes(0).seconds(0).hours(0);
         this.setState({
             process:true,
             process_data:{
@@ -147,7 +151,15 @@ class Bson extends React.Component {
                 current:0,
                 total:0,
                 percentage:0,
-            }
+            },
+            process_time:this.startTime.format("HH:mm:ss")
+        },()=>{
+            this.timeClock = setInterval(()=>{
+                this.startTime.add(1, 's');
+                this.setState({
+                    process_time:this.startTime.format("HH:mm:ss")
+                })
+            },1000);
         });
     }
 
@@ -165,7 +177,6 @@ class Bson extends React.Component {
             data.coll_total = res.total;
             data.percentage = 0;
         } else if (res.type === 2) {
-            data.collection = res.collection;
             data.current = res.current;
             data.total = res.total;
             data.percentage = Math.round(res.current/res.total*100);
@@ -174,22 +185,28 @@ class Bson extends React.Component {
     }
 
     complete(res) {
+        clearInterval(this.timeClock);
         this.setState({
             process:false
         },()=>{
-            this.modal.alert('导出数据完成!',()=>{
+            this.modal.alert(<>
+                <p>导出数据完成!</p>
+                <p>已用时: {this.state.process_time}</p>
+            </>,()=>{
                 this.props.callback(true);
             });
         });
     }
 
     cancel() {
+        clearInterval(this.timeClock);
         this.setState({
             process:false
         })
     }
 
     error(res) {
+        clearInterval(this.timeClock);
         this.setState({
             process:false
         },()=>{
@@ -232,6 +249,7 @@ class Bson extends React.Component {
         return (
             <Card className='mt-2'>
                 正在导出: {this.state.process_data.collection} ({this.state.process_data.coll_current} / {this.state.process_data.coll_total})
+                已用时: {this.state.process_time}
                 <hr className='my-2'/>
                 <div className="progress">
                     <div className="progress-bar progress-bar-striped progress-bar-animated" style={{width:this.state.process_data.percentage+'%'}}>

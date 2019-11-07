@@ -96,7 +96,11 @@ class DataFilter extends React.Component {
             if (!item.field || !item.query) {
                 return false;
             }
-            filter[item.field] = this.getTypeValue(item);
+            if (filter[item.field]) {
+                filter[item.field] = Object.assign(filter[item.field],this.getTypeValue(item))
+            } else {
+                filter[item.field] = this.getTypeValue(item);
+            }
         });
         return filter;
     }

@@ -36,6 +36,14 @@ class DataPanel extends React.PureComponent {
         this.loadData(1);
     }
 
+    componentWillReceiveProps(nextProps, nextContext) {
+        if (this.props.collection !== nextProps.collection) {
+            this.server = nextProps.server;
+            this.database = nextProps.database;
+            this.collection = nextProps.collection;
+        }
+    }
+
     loadData(page) {
         this.modal.loading('加载中...');
         Fetch('/serv/exec/query',{
@@ -105,7 +113,7 @@ class DataPanel extends React.PureComponent {
         let header = this.searchDataKey(key);
         if (typeof val === 'object') {
             return <>
-                <Icon icon='file-alt'/>{'\u0020'}
+                <Icon icon='file-alt'/>{'\u0010'}
                 <span style={{color:this.getDataTypeColor(header.type)}}>{JSON.stringify(val)}</span>
             </>;
         }
@@ -156,7 +164,7 @@ class DataPanel extends React.PureComponent {
                 server:this.server,
                 database:this.database,
                 collection:this.collection,
-            }} mode='modify' data={data} callback={()=>{
+            }} mode='modify' data={data} idType={this.searchDataKey("_id")} callback={()=>{
                 this.context.modal().close();
             }} loadPath='/data/DataEdit'/>,
         });
@@ -188,6 +196,45 @@ class DataPanel extends React.PureComponent {
                 })
             }
         });
+    };
+
+    deleteDataSelect = (e,field,data) => {
+        let list = this.tab.getSelectRows();
+        if (list.length<=0) {
+            this.modal.alert("请选择需要删除的数据")
+            return
+        }
+        let ids = list.map(row=>{
+            return row._id;
+        });
+        this.modal.confirm({
+            title  : '警告',
+            content: <span className='text-break'>是否真的要删除文档: {`"_id":"${JSON.stringify(ids,null,2)}"`} ?</span>,
+            callback: (ok)=>{
+                if (!ok) return false;
+                this.modal.loading('删除文档中...');
+                Fetch('/serv/exec/delete_multi',{
+                    server_id: this.server.id,
+                    database: this.database,
+                    collection: this.collection,
+                    id_list: ids,
+                },(res)=>{
+                    if (res.status) {
+                        this.modal.alert({
+                            content:`成功删除文档 ${res.data} 条!`,
+                            callback:()=>{
+                                this.loadData(1);
+                            }
+                        });
+                    } else {
+                        this.modal.alert(<>
+                            <p>删除选中文档失败,错误:</p>
+                            <p>{res.msg}</p>
+                        </>);
+                    }
+                })
+            }
+        })
     };
 
     sortHandler = (field,sort_type)=>{
@@ -299,22 +346,34 @@ class DataPanel extends React.PureComponent {
     renderData() {
         let menu = [
             {
-                field:'add',
-                text: <><Icon className='pr-1' icon='plus'/>添加数据</>,
-                click: this.addData,
-            },
-            {
-                field:'editor',
-                text: <><Icon className='pr-1' icon='edit'/>编辑数据</>,
-                click: this.showData,
-            },
-            {
-                field:'delete',
-                text: <><Icon className='pr-1' icon='trash-alt'/>删除数据</>,
-                click: this.deleteData,
-            },
+                field:'data',
+                text: <><Icon className='pr-1' icon='data'/>数据操作</>,
+                // click: this.addData,
+                children:[
+                    {
+                        field:'data-add',
+                        text: <><Icon className='pr-1' icon='plus'/>添加数据</>,
+                        click: this.addData,
+                    },
+                    {
+                        field:'data-edit',
+                        text: <><Icon className='pr-1' icon='edit'/>编辑数据</>,
+                        click: this.showData,
+                    },
+                    {
+                        field:'data-delete',
+                        text: <><Icon className='pr-1' icon='trash-alt'/>删除数据</>,
+                        click: this.deleteData,
+                    },
+                    {
+                        field:'data-delete-select',
+                        text: <><Icon className='pr-1' icon='trash-alt'/>删除选中数据</>,
+                        click: this.deleteDataSelect,
+                    }
+                ]
+            }
         ];
-        return <CTable position={{
+        return <CTable ref={c=>this.tab=c} position={{
             right:'0',
             left:'0',
             top:'0',

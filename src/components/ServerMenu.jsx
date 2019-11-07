@@ -443,7 +443,7 @@ class ServerMenu extends React.Component {
                 </Menu.Item>
                 <Menu.Item field="export_database" text='导出数据' child>
                     <Menu.Item onClick={this.exportBson}>导出 bson</Menu.Item>
-                    <Menu.Item onClick={null}>导出 csv</Menu.Item>
+                    {/*<Menu.Item onClick={null}>导出 csv</Menu.Item>*/}
                 </Menu.Item>
             </Menu>
         </>)

@@ -5,3 +5,4 @@ build
 app/cmd/*
 app/ui/manage
 app/ui/index.js
+buildcmd

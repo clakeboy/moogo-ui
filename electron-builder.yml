@@ -1,11 +1,11 @@
 appId: "ck.moogo"
-productName: "moogo"
+productName: "Moogo"
 directories:
   output: "build"
 files:
   - "app/**/*"
 asarUnpack:
-  - "app/accesscmd/**/*"
+  - "app/cmd/**/*"
 #extraResources:
 #  - from: "static"
 #    to: "static"
@@ -22,17 +22,28 @@ dmg:
       type: "file"
 mac:
   category: "ck.app.moogo"
-  icon: "static/app.ico"
+  icon: "static/Icon.icns"
   target:
     - "zip"
     - "dmg"
 win:
-  icon: "static/app.ico"
+  icon: "static/moogo.ico"
   target:
-#    - "nsis"
-    - "zip"
+    - "nsis"
+#    - "zip"
 linux:
-  icon: "static/app.ico"
+  icon: "static/moogo.ico"
 nsis:
-  oneClick: true
+  perMachine: true
   artifactName: "${productName}-setup-${version}.${ext}"
+  oneClick: false # 是否一键安装
+  allowElevation: true # 允许请求提升。 如果为false，则用户必须使用提升的权限重新启动安装程序。
+  allowToChangeInstallationDirectory: true # 允许修改安装目录
+  installerIcon: "./static/moogo.ico" # 安装图标
+  uninstallerIcon: "./static/moogo.ico" # 卸载图标
+  installerHeaderIcon: "./static/moogo.ico" # 安装时头部图标
+  createDesktopShortcut: true # 创建桌面图标
+  createStartMenuShortcut: true # 创建开始菜单图标
+  shortcutName: "${productName}" # 图标名称
+#  include: "build/script/installer.nsh" # 包含的自定义nsis脚本 这个对于构建需求严格得安装过程相当有用。
+#  script: "build/script/installer.nsh" # NSIS脚本的路径，用于自定义安装程序。 默认为build / installer.nsi
