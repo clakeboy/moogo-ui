@@ -29,8 +29,8 @@ mac:
 win:
   icon: "static/moogo.ico"
   target:
-    - "nsis"
-#    - "zip"
+#    - "nsis"
+    - "zip"
 linux:
   icon: "static/moogo.ico"
 nsis:

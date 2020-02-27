@@ -1,6 +1,6 @@
 {
   "name": "moogo",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "mongodb gui control",
   "main": "app/main.js",
   "scripts": {
@@ -74,8 +74,8 @@
   },
   "dependencies": {
     "@clake/ckio": "^0.0.2",
-    "@clake/react-bootstrap4": "^0.9.26",
-    "@clake/react-bootstrap4-window": "^0.2.5",
+    "@clake/react-bootstrap4": "^1.0.4",
+    "@clake/react-bootstrap4-window": "^0.2.6",
     "classnames": "^2.2.6",
     "es6-promise": "^4.2.8",
     "react-ace": "^6.6.0",

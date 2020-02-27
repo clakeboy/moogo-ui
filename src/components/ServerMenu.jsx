@@ -273,10 +273,10 @@ class ServerMenu extends React.Component {
             }} loadPath='/export/Bson'/>,
         });
     };
-    //导入
+    //导入BSON
     importData = (e,field,data) => {
         this.getModal().view({
-            title:'数据导入',
+            title:'BSON 数据导入',
             close:false,
             content:<LoaderComponent import={GetComponent} conn={data.serverInfo} callback={(refresh)=>{
                 this.getModal().close();
@@ -287,6 +287,22 @@ class ServerMenu extends React.Component {
                     })
                 }
             }} loadPath='/import/Bson'/>,
+        });
+    };
+    //导入CSV
+    importCsv = (e,field,data) => {
+        this.getModal().view({
+            title:'CSV 数据导入',
+            close:false,
+            content:<LoaderComponent import={GetComponent} conn={data.serverInfo} callback={(refresh)=>{
+                this.getModal().close();
+                if (refresh) {
+                    this.refreshConnect(null,null,{
+                        serverInfo:data.serverInfo.server,
+                        serverIndex:data.serverIndex,
+                    })
+                }
+            }} loadPath='/import/Csv'/>,
         });
     };
     //创建文档集合 collection
@@ -354,6 +370,7 @@ class ServerMenu extends React.Component {
         return this.state.serverList.map((tree,idx)=>{
             return <Tree data={tree} onDbClick={this.doOpen} onMenu={(e,item,id)=>{
                 e.preventDefault();
+                e.stopPropagation();
                 if (item.type === 'server') {
                     this.connectMenu.show({evt:e,type:'mouse',data:{
                         serverIndex:idx,
@@ -438,8 +455,9 @@ class ServerMenu extends React.Component {
                     删除数据库
                 </Menu.Item>
                 <Menu.Item step/>
-                <Menu.Item field="import_database" onClick={this.importData}>
-                    导入数据
+                <Menu.Item field="import_database" text='导入数据' child>
+                    <Menu.Item onClick={this.importData}>导入 bson</Menu.Item>
+                    <Menu.Item onClick={this.importCsv}>导入 csv</Menu.Item>
                 </Menu.Item>
                 <Menu.Item field="export_database" text='导出数据' child>
                     <Menu.Item onClick={this.exportBson}>导出 bson</Menu.Item>

@@ -63,7 +63,7 @@ export default merge(cfg,{
     //     // },
     //     minimize:true,
     // },
-    // mode: 'production',
-    mode: 'development',
+    mode: 'production',
+    // mode: 'development',
     devtool: 'eval-source-map',
 });

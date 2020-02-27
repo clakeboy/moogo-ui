@@ -1,6 +1,6 @@
 const { ipcRenderer,remote } = require('electron');
 const spawn = require('child_process').spawn;
-const {dialog} = remote;
+const {dialog,Menu} = remote;
 const path = require('path');
 const os = require('os');
 const fs = require('fs');
@@ -17,23 +17,23 @@ if (!fs.existsSync(tmpDir)) {
 
 window.remote = {
     process : remote.process,
-    openFile : (cb)=>{
+    openFile : (extList)=>{
+        let extensions = extList || ['tgz'];
         // let win  = ipcRenderer.sendSync('getMainWindow','');
-        console.log(dialog.showOpenDialog(remote.getCurrentWindow(),{
+        return dialog.showOpenDialogSync(remote.getCurrentWindow(),{
             title:'选择文件', properties: ['openFile'],
             filters:[
-                { name: 'compress', extensions: ['tgz'] }
+                { name: 'compress', extensions: extensions }
             ]
-        },cb));
+        })
     },
-    openDirectory: (cb)=>{
+    openDirectory: ()=>{
         // let win  = ipcRenderer.sendSync('getMainWindow','');
         // console.log(dialog.showSaveDialog(win,{title:'choose directory'},cb));
-        console.log(dialog.showOpenDialog(remote.getCurrentWindow(),{
+        return dialog.showOpenDialogSync(remote.getCurrentWindow(),{
             title:'选择目录',
-            properties: ['openDirectory']},
-            cb
-        ));
+            properties: ['openDirectory']
+        })
     },
     getWindowList: (file,cb)=>{
         let AccessExport = spawn(accesscmd,['-f',file,'--windows']);
@@ -103,3 +103,16 @@ window.remote = {
         }
     }
 };
+
+//global context menu
+
+const contextMenu = Menu.buildFromTemplate([
+    { role: 'cut' ,label:'剪切'},
+    { role: 'copy' ,label:'复制'},
+    { role: 'paste',label:'粘贴' },
+]);
+
+window.addEventListener('contextmenu',(e)=>{
+    e.preventDefault();
+    contextMenu.popup({window:remote.getCurrentWindow()})
+});

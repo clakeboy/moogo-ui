@@ -1,18 +1,15 @@
 /**
- * Created by clakeboy on 2019/10/21.
+ * Created by clakeboy on 2019/11/19.
  */
 import React from 'react';
 import {
     Button,
-    Card, Icon, Input, Modal, Table,
-    Tabs,
-    TabsContent
-} from "@clake/react-bootstrap4";
+    Card, Icon, Modal, Table, Tabs, TabsContent,Input,
+    Switch,
+} from '@clake/react-bootstrap4';
 import Fetch from "../../common/Fetch";
 import Socket from "../../common/Socket";
-import moment from 'moment';
-
-class Bson extends React.Component {
+class Csv extends React.Component {
     constructor(props) {
         super(props);
         this.conn = this.props.conn;
@@ -24,12 +21,14 @@ class Bson extends React.Component {
             file_data:[],
             dir_data:[],
             process_time:'',
+
         };
         this.timeClock = null;
         this.startTime = null;
     }
 
     componentDidMount() {
+        this.loadCollectionList();
         Socket.on(Socket.evtTypes.IMPORT_DATA,this.receive);
     }
 
@@ -41,7 +40,23 @@ class Bson extends React.Component {
         this.conn = nextProps.conn;
         this.setState({
             select_type:'file',
-        })
+        });
+        this.loadCollectionList();
+    }
+
+    loadCollectionList() {
+        Fetch("/serv/coll/list",{
+            server_id: this.conn.server.id,
+            database:  this.conn.database,
+        },(res)=>{
+            if (res.status) {
+                this.collectionList = res.data;
+            } else {
+                this.alertError("加载集合列表出错",e)
+            }
+        },(e)=>{
+            this.alertError("加载集合方法出错",e)
+        });
     }
 
     tabSelectHandler = (id)=>{
@@ -53,8 +68,7 @@ class Bson extends React.Component {
 
     chooseHandler(type) {
         if (type === 'file') {
-            let file = window.remote.openFile(['tgz','bson']);
-            console.log(file);
+            let file = window.remote.openFile(['tgz','csv']);
             if (file) {
                 this.setState({
                     import_file:file[0]
@@ -89,20 +103,21 @@ class Bson extends React.Component {
         Fetch("/serv/backup/read",{
             read_type:this.state.select_type,
             target_path:this.state.select_type === 'file'?this.state.import_file : this.state.import_dir,
-            filter_ext:['.bson']
+            filter_ext: ['.csv']
         },(res)=>{
             this.modal.close();
             if (res.status) {
                 let state;
+                let data = this.formatImportList(res.data);
                 if (this.state.select_type === 'file') {
                     state = {
-                        data:res.data,
-                        file_data:res.data,
+                        data:data,
+                        file_data:data,
                     };
                 } else {
                     state = {
-                        data:res.data,
-                        dir_data:res.data,
+                        data:data,
+                        dir_data:data,
                     };
                 }
                 this.setState(state,()=>{
@@ -117,32 +132,12 @@ class Bson extends React.Component {
         })
     }
 
-    startHandler = ()=>{
-        let list = this.validate();
-        if (!list) {
-            return
-        }
-
-        let data = {
-            server:{
-                server_id:this.conn.server.id,
-                database: this.conn.database,
-            },
-            type: this.state.select_type === 'file'?1:2,
-            path: this.state.select_type === 'file'?this.state.import_file:this.state.import_dir,
-            collection_list:list,
-            code: "start",
-            import_type: 1,
-        };
-        Socket.emit(Socket.evtTypes.IMPORT_DATA,data,(data)=>{
-            let res = JSON.parse(data);
-            if (res.code === 'start') {
-                this.start(res);
-            } else {
-                this.error(res)
-            }
-        })
-    };
+    formatImportList(data) {
+        return data.map((item)=>{
+            item.is_first_column = true;
+            return item;
+        });
+    }
 
     validate() {
         if (this.state.select_type === 'file' && this.state.import_file === "") {
@@ -163,6 +158,40 @@ class Bson extends React.Component {
 
         return list;
     }
+
+    alertError(msg,e) {
+        this.modal.alert(<>
+            <p>{msg}:</p>
+            <p>{e}</p>
+        </>);
+    }
+
+    startHandler = ()=>{
+        let list = this.validate();
+        if (!list) {
+            return
+        }
+
+        let data = {
+            server:{
+                server_id:this.conn.server.id,
+                database: this.conn.database,
+            },
+            type: this.state.select_type === 'file'?1:2,
+            path: this.state.select_type === 'file'?this.state.import_file:this.state.import_dir,
+            collection_list:list,
+            code: "start",
+            import_type: 2,
+        };
+        Socket.emit(Socket.evtTypes.IMPORT_DATA,data,(data)=>{
+            let res = JSON.parse(data);
+            if (res.code === 'start') {
+                this.start(res);
+            } else {
+                this.error(res)
+            }
+        })
+    };
 
     receive = (evt,data)=>{
         let res = JSON.parse(data);
@@ -261,6 +290,22 @@ class Bson extends React.Component {
         return data;
     }
 
+    changeHandler(row_idx) {
+        return (val)=>{
+            let list = this.state.data;
+            list[row_idx]['override'] = val;
+            this.setState({
+                data:list
+            })
+        };
+    }
+
+    settingCsvColumn = (e)=>{
+        return ()=>{
+
+        };
+    };
+
     render() {
         return (
             <div>
@@ -273,7 +318,7 @@ class Bson extends React.Component {
                     <TabsContent id='file' text='选择文件'>
                         <div className="p-2">
                             <div className="input-group">
-                                <input type="text" className="form-control" placeholder="选择导入文件,压缩文件 .tgz 或 .bson 的文本文件" value={this.state.import_file}/>
+                                <input type="text" className="form-control" placeholder="选择导入文件,压缩文件 .tgz 或 .csv 的文本文件" value={this.state.import_file}/>
                                 <div className="input-group-append">
                                     <Button disabled={this.state.process} onClick={()=>{
                                         this.chooseHandler('file')
@@ -285,7 +330,7 @@ class Bson extends React.Component {
                     <TabsContent id='folder' text='选择文件夹'>
                         <div className="p-2">
                             <div className="input-group">
-                                <input type="text" className="form-control" placeholder="选择导入文件夹,包含 .bson 的文件夹" value={this.state.import_dir}/>
+                                <input type="text" className="form-control" placeholder="选择导入文件夹,包含 .csv 的文件夹" value={this.state.import_dir}/>
                                 <div className="input-group-append">
                                     <Button disabled={this.state.process} onClick={()=>{
                                         this.chooseHandler('folder')
@@ -296,7 +341,25 @@ class Bson extends React.Component {
                     </TabsContent>
                 </Tabs>
                 <Table ref={c=>this.coll_table=c} className='border mt-2' emptyText='没有可导入的数据集合' striped={false} sm select={true} height='300px' headerTheme='light' data={this.state.data}>
-                    <Table.Header field='collection' text='选择要导入的数据集合' />
+                    <Table.Header field='collection' text='导入文件名'/>
+                    <Table.Header field='override' text='导入复盖集合名称' width='200px' onFormat={(val,row,idx)=>{
+                        return <Input combo={{
+                            searchColumn:'collection',
+                            width:'100%',
+                        }} comboData={this.collectionList} data={val} onChange={this.changeHandler(idx)} placeholder='选择或输入集合名称' size='sm'/>
+                    }}/>
+                    <Table.Header field='is_first_column' text='首行字段' onFormat={(val,row,idx)=>{
+                        return <Switch checked={val} onChange={(check)=>{
+                            let list = this.state.data;
+                            list[idx]['is_first_column'] = check;
+                            this.setState({
+                                data:list
+                            })
+                        }}/>
+                    }}/>
+                    <Table.Header field='columns' text='设置字段名' onFormat={(val,row,idx)=>{
+                        return <Button size='sm' onClick={this.settingCsvColumn(idx)} disabled={this.state.data[idx].is_first_column}>设置导入字段</Button>
+                    }}/>
                     <Table.Header field='size' text='文件大小' onFormat={(val)=>{
                         return this.formatSize(val);
                     }}/>
@@ -331,12 +394,12 @@ class Bson extends React.Component {
     }
 }
 
-Bson.propTypes = {
+Csv.propTypes = {
 
 };
 
-Bson.defaultProps = {
+Csv.defaultProps = {
 
 };
 
-export default Bson;
+export default Csv;

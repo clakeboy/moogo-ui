@@ -62,13 +62,12 @@ class Bson extends React.Component {
     }
 
     chooseHandler = (e)=>{
-        window.remote.openDirectory((dir)=>{
-            if (dir) {
-                this.setState({
-                    export_dir:dir[0]
-                })
-            }
-        })
+        let dir = window.remote.openDirectory();
+        if (dir) {
+            this.setState({
+                export_dir:dir[0]
+            })
+        }
     };
 
     closeHandler = (e)=> {

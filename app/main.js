@@ -16,10 +16,13 @@ function createWindow() {
     // Create the browser window.
     mainWindow = new BrowserWindow({
         width: 1280, height: 800,
+        minWidth:800,minHeight:600,
         title:'Moogo v'+appPkg.version,
         center:true,
         resizable:true,
         fullscreen:false,
+        show:false,
+        backgroundColor:'#E2E2E2',
         webPreferences:{
             nodeIntegration:false,
             preload:path.join(__dirname, './preload.js')
@@ -42,6 +45,25 @@ function createWindow() {
         // in an array if your app supports multi windows, this is the time
         // when you should delete the corresponding element.
         mainWindow = null
+    });
+    mainWindow.on('ready-to-show',()=>{
+        mainWindow.show();
+        let web = mainWindow.webContents;
+        // web.executeJavaScript("alert('hi')",true).then((res)=>{
+        //     console.log(res);
+        // });
+        setTimeout(()=>{
+            web.sendInputEvent({type:'mouseDown', x:73, y: 61, button:'left', clickCount: 2});
+            web.sendInputEvent({type:'mouseUp', x:73, y: 61, button:'left', clickCount: 2});
+            // web.sendInputEvent({type:'mouseDown', x:73, y: 61, button:'left', clickCount: 1});
+            // web.sendInputEvent({type:'mouseUp', x:73, y: 61, button:'left', clickCount: 1});
+        },1000);
+        web.on('before-input-event', (event, input) => {
+            // For example, only enable application menu keyboard shortcuts when
+            // Ctrl/Cmd are down.
+            // win.webContents.setIgnoreMenuShortcuts(!input.control && !input.meta)
+            console.log(event,input);
+        })
     });
     if (process.platform === 'darwin') {
         let isMac = true;
@@ -77,7 +99,8 @@ function createWindow() {
                     { type: 'separator' },
                     { role: 'cut' ,label:'剪切'},
                     { role: 'copy' ,label:'复制'},
-                    { role: 'paste',label:'粘贴' }
+                    { role: 'paste',label:'粘贴' },
+                    { role: 'selectAll',label:'全选' }
                 ]
             },
             ...(debug || appDebug ? [{
@@ -179,7 +202,7 @@ app.on('activate', function () {
 });
 
 app.on('quit',function () {
-    sub_process.kill();
+    !debug && sub_process.kill();
 });
 
 // In this file you can include the rest of your app's specific main process

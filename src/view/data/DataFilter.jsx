@@ -44,7 +44,7 @@ class DataFilter extends React.Component {
     }
 
     componentWillReceiveProps(nextProps, nextContext) {
-        if (this.state.keys !== nextProps.keys) {
+        if (nextProps.keys && this.state.keys !== nextProps.keys) {
             this.setState({keys:nextProps.keys})
         }
     }
@@ -164,6 +164,10 @@ class DataFilter extends React.Component {
         return value;
     }
 
+    formatColumn(val) {
+        return <span className='text-primary'>{val}</span>
+    }
+
     render() {
         return (
             <div>
@@ -173,7 +177,7 @@ class DataFilter extends React.Component {
                             searchColumn:'key',
                             width: 'unset',
                             showRows:10,
-                            filterColumns:['key','type_name']
+                            filterColumns:['key',{field:'type_name',format:this.formatColumn}]
                         }} comboData={this.state.keys} data={item.field} onChange={this.changeHandler('field',idx)}/>
                         <Input className='px-1' size='xs' width='70px' placeholder='条件' readOnly combo={{
                             searchColumn:'text',

@@ -90,7 +90,7 @@ export default class App extends React.Component {
                 <div className='d-flex flex-grow-1 ck-main h-100'>
                     <ServerMenu ref={c=>this.leftDom=c} query={GetQuery(this.props.location.search)}/>
                     <div className='flex-grow-1 main-content'>
-                        <Main/>
+                        <LoaderComponent import={GetComponent} loadPath={load_path}/>
                     </div>
                     <div ref={c=>this.splitDom=c} className='ck-split-line' style={{left:'200px'}}/>
                 </div>
