@@ -70,7 +70,7 @@
     "webpack-dev-middleware": "^3.7.2",
     "webpack-hot-middleware": "^2.25.0",
     "webpack-merge": "^4.2.2",
-    "minimist": "^1.2.0"
+    "minimist": "^1.2.2"
   },
   "dependencies": {
     "@clake/ckio": "^0.0.2",
